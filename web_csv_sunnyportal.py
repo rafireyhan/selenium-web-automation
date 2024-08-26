@@ -43,7 +43,7 @@ def download_csv():
 if __name__ == "__main__":
     try:
         web = 'https://www.sunnyportal.com/Templates/Start.aspx'
-        path = "./chromedriver-win64/chromedriver.exe"
+        path = "./chromedriver/chromedriver"
         service = Service(executable_path=path)
         options = Options()
         prefs = {
@@ -53,7 +53,7 @@ if __name__ == "__main__":
             "safebrowsing.enabled": False
             }
         options.add_experimental_option("prefs", prefs)
-        options.add_argument("--headless=new") # Headless Browser Windows
+        # options.add_argument("--headless=new") # Headless Browser Windows
         options.add_argument("--disable-gpu")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--no-sandbox")

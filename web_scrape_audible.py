@@ -3,7 +3,7 @@ from selenium.webdriver.chrome.service import Service
 import pandas as pd
 
 web = 'https://www.audible.com/search'
-path = "D:/Sovware/Selenium/chromedriver-win64/chromedriver.exe"
+path = "./chromedriver/chromedriver"
 service = Service(executable_path=path)
 driver = webdriver.Chrome(service=service)
 

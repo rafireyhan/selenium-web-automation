@@ -200,10 +200,10 @@ def get_revenue(value):
 if __name__ == "__main__":
     try:
         web = 'https://eu5.fusionsolar.huawei.com/pvmswebsite/loginCustomize.html'
-        path = "./chromedriver-win64/chromedriver.exe"
+        path = "./chromedriver/chromedriver"
         service = Service(executable_path=path)
         options = Options()
-        options.add_argument("--headless") # Headless Browser Windows
+        # options.add_argument("--headless") # Headless Browser Windows
         driver = webdriver.Chrome(service=service, options=options)
         driver.get(web)
 
