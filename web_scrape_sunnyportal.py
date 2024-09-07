@@ -11,6 +11,8 @@ import sys
 import logging
 import time
 import json
+import re
+import requests
 
 # Konfigurasi Logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -61,11 +63,12 @@ def login():
 def get_system(json):
     try:
         # Get System Name
+        time.sleep(5)
         system_name = WebDriverWait(driver,30).until(
             EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'ennexos-nav-container ennexos-arrow ennexos-active')]/span"))
         ).text
 
-        json["system_name"] = system_name
+        json["plant_name"] = system_name
         logging.info("System Name berhasil di-ambil!")
         
         return json
@@ -78,6 +81,7 @@ def get_system(json):
 def get_weather_status(json):
     try:
         # Get Weather Data
+        time.sleep(5)
         data_status = WebDriverWait(driver,60).until(
             EC.presence_of_all_elements_located((By.XPATH, "//sma-widget-sub-label[contains(@class, 'sma-weather-sub-label')]"))
         )
@@ -95,6 +99,7 @@ def get_weather_status(json):
 def get_weather_temperature(json):
     try:
         # Get Weather Data
+        time.sleep(5)
         data_temperature = WebDriverWait(driver,30).until(
             EC.presence_of_all_elements_located((By.XPATH, "//div[contains(@class, 'sma-weather-item')]/div/ennexos-value-unit-pair/ennexos-text/div"))
         )
@@ -112,11 +117,12 @@ def get_weather_temperature(json):
 def get_revenue(json):
     try:
         # Get Revenue Data
+        time.sleep(5)
         data_revenue = WebDriverWait(driver,30).until(
             EC.presence_of_all_elements_located((By.XPATH, "//sma-revenue-widget/sma-widget-item-wrapper/div/div/ennexos-value-unit-pair/ennexos-text/div"))
         )
 
-        json["today_revenue"] = data_revenue[0].text
+        json["today_revenue"] = float(data_revenue[0].text)
     
         logging.info("Revenue berhasil di-ambil!")
 
@@ -129,11 +135,12 @@ def get_revenue(json):
 def get_co2(json):
     try:
         # Get CO2 Data
+        time.sleep(5)
         data_co2 = WebDriverWait(driver,30).until(
             EC.presence_of_all_elements_located((By.XPATH, "//sma-co2-widget/sma-widget-item-wrapper/div/div/ennexos-value-unit-pair/ennexos-text/div"))
         )
 
-        json["co2_avoidance"] = data_co2[0].text
+        json["co2_avoidance"] = float(data_co2[0].text)
     
         logging.info("CO2 Avoidance berhasil di-ambil!")
 
@@ -146,11 +153,19 @@ def get_co2(json):
 def get_energy(json):
     try:
         # Get Energy Data
+        time.sleep(5)
         data_energy = WebDriverWait(driver,30).until(
             EC.presence_of_all_elements_located((By.XPATH, "//sma-header-widget/div/div[contains(@class, 'sma-right-side')]/div[contains(@class, 'sma-header-widget-value-entry last-item ng-star-inserted')]/div"))
         )
 
-        json["energy"] = data_energy[0].text
+        # Ambil teks dari elemen yang di-scrape
+        energy_text = data_energy[0].text
+        
+        # Gunakan regex untuk mengekstrak nilai float
+        energy_value = re.findall(r'\d+\.\d+', energy_text)
+        
+        if energy_value:
+            json["energy"] = float(energy_value[0])
     
         logging.info("Energy berhasil di-ambil!")
 
@@ -162,6 +177,7 @@ def get_energy(json):
 # Function untuk mengambil status
 def get_status(json):
     try:
+        time.sleep(5)
         devices_name = WebDriverWait(driver, 30).until(
             EC.presence_of_all_elements_located((By.XPATH, "//div[contains(@class, 'sma-item-wrapper ng-star-inserted')]/div/ennexos-text/div/a"))
         )
@@ -201,7 +217,7 @@ def get_status(json):
         }
 
         # Tambahkan devices_status ke dalam json (asumsikan json adalah dictionary)
-        json["devices_status"] = devices_status
+        json["plant_status"] = devices_status
 
         logging.info(f"Status berhasil diambil: {devices_status}")
 
@@ -220,7 +236,7 @@ if __name__ == "__main__":
 
         # ChromedriverOptions
         options = Options()
-        # options.add_argument("--headless=new") # Headless Browser Windows
+        # options.add_argument("--headless=new") # For Headless Browser Windows
         options.add_argument("--disable-gpu")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--no-sandbox")
@@ -231,6 +247,7 @@ if __name__ == "__main__":
 
         results = {}
     
+        # Call Function
         login()
         get_system(results)
         # driver.refresh()
@@ -241,9 +258,26 @@ if __name__ == "__main__":
         get_energy(results)
         get_status(results)
 
+        # Data Manipulate
+        # results = {
+        #     "plant_name": "AUTO2000-KELAPA-GADING",
+        #     "today_revenue": 0.0,
+        #     "co2_avoidance": 0.0,
+        #     "energy": 93.78,
+        # }
+
         # print(results)
-        with open('results.json', 'w') as f:
-            json.dump(results, f, indent=4)
+        # with open('results.json', 'w') as f:
+        #     json.dump(results, f, indent=4)
+
+         # Send results to API
+        url = 'http://172.17.63.153:1162/epn/sma'
+        headers = {'Content-Type': 'application/json'}
+        data = json.dumps(results)
+        response = requests.post(url, headers=headers, json=results)
+        print(response.text)
+        print(results)
+
     except Exception as e:
         logging.error(f"Error: {str(e)}")
         logging.info("Exiting")
