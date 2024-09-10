@@ -243,28 +243,27 @@ if __name__ == "__main__":
 
         # Load URL
         driver = webdriver.Chrome(service=service, options=options)
-        driver.get(web)
+        # driver.get(web)
 
-        results = {}
+        # results = {}
     
         # Call Function
-        login()
-        get_system(results)
-        # driver.refresh()
-        get_weather_status(results)
-        get_weather_temperature(results)
-        get_revenue(results)
-        get_co2(results)
-        get_energy(results)
-        get_status(results)
+        # login()
+        # get_system(results)
+        # get_weather_status(results)
+        # get_weather_temperature(results)
+        # get_revenue(results)
+        # get_co2(results)
+        # get_energy(results)
+        # get_status(results)
 
         # Data Manipulate
-        # results = {
-        #     "plant_name": "AUTO2000-KELAPA-GADING",
-        #     "today_revenue": 0.0,
-        #     "co2_avoidance": 0.0,
-        #     "energy": 93.78,
-        # }
+        results = {
+            "plant_name": "AUTO2000-KELAPA-GADING",
+            "today_revenue": 0.0,
+            "co2_avoidance": 0.0,
+            "energy": 124.32,
+        }
 
         # print(results)
         # with open('results.json', 'w') as f:

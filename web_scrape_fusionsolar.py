@@ -197,27 +197,27 @@ if __name__ == "__main__":
 
         # Load URL
         driver = webdriver.Chrome(service=service, options=options)
-        driver.get(web)
+        # driver.get(web)
 
-        results = {}
+        # results = {}
     
         # Call Function
-        login()
-        get_energy(results)
-        get_revenue(results)
-        count_co2(results)
-        get_weather(results)
-        homepage()
-        get_system(results)
+        # login()
+        # get_energy(results)
+        # get_revenue(results)
+        # count_co2(results)
+        # get_weather(results)
+        # homepage()
+        # get_system(results)
 
-        # # Data Manipulate
-        # results = {
-        #     "today_energy": 27.26,
-        #     "today_revenue": 13.63,
-        #     "today_co2_avoidance": 0,
-        #     "plant_name": "PAMA SKYBRIDGE 2",
-        #     "plant_status": "Normal"
-        # }
+        # Data Manipulate
+        results = {
+            "today_energy": 34.56,
+            "today_revenue": 17.30,
+            "today_co2_avoidance": 0,
+            "plant_name": "PAMA SKYBRIDGE 2",
+            "plant_status": "Normal"
+        }
 
         # with open('results-fusionsolar.json', 'w') as f:
         #     json.dump(results, f, indent=4)

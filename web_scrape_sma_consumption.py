@@ -60,6 +60,24 @@ def login():
         logging.error(f"Gagal membuka Login Page! : {e}")
         driver.quit()
 
+# Function untuk mengambil nama device
+def get_device(json):
+    try:
+        time.sleep(5)
+        devices_name = WebDriverWait(driver, 30).until(
+            EC.presence_of_all_elements_located((By.XPATH, "//div[contains(@class, 'sma-item-wrapper ng-star-inserted')]/div/ennexos-text/div/a"))
+        )
+
+        json["device_name"] = devices_name[2].text
+
+        logging.info(f"Device name berhasil diambil: {devices_name[2].text}")
+
+        return json
+
+    except Exception as e:
+        logging.error(f"Gagal mengambil Status! : {e}")
+        driver.quit()
+
 # Function untuk membuka page Energy & Power
 def power_page():
     try:
@@ -101,7 +119,9 @@ def get_energy(json):
         # Get Latest Index
         latest_index = len(array_power) - 1
 
-        json["energy_consumption"] = array_power[latest_index].text
+        # Clean the string to remove commas before converting to float
+        energy_value = array_power[latest_index].text.replace(',', '.')
+        json["energy_consumption"] = float(energy_value)
 
         # Get Time Period
         array_time = WebDriverWait(driver,30).until(
@@ -148,10 +168,17 @@ if __name__ == "__main__":
     
         # Call Function
         login()
+        get_device(results)
         power_page()
         get_energy(results)
 
         print(results)
+        # Send results to API
+        url = 'http://172.17.63.153:1162/epn/sma-consume'
+        headers = {'Content-Type': 'application/json'}
+        data = json.dumps(results)
+        response = requests.post(url, headers=headers, json=results)
+        print(response.text)
 
     except Exception as e:
         logging.error(f"Error: {str(e)}")

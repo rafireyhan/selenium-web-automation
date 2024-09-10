@@ -64,6 +64,10 @@ def login():
 def get_status(json):
     try:
         time.sleep(5)
+        devices_name = WebDriverWait(driver, 30).until(
+            EC.presence_of_all_elements_located((By.XPATH, "//div[contains(@class, 'sma-item-wrapper ng-star-inserted')]/div/ennexos-text/div/a"))
+        )
+
         hover = WebDriverWait(driver, 30).until(
             EC.presence_of_all_elements_located((By.XPATH, "//ennexos-icon[contains(@class, 'mat-mdc-tooltip-trigger ng-star-inserted')]/img"))
         )
@@ -78,6 +82,7 @@ def get_status(json):
         ).text
 
         # Tambahkan devices_status ke dalam json (asumsikan json adalah dictionary)
+        json["device_name"] = devices_name[0].text
         json["device_status"] = status
 
         logging.info(f"Status berhasil diambil: {status}")
@@ -179,6 +184,15 @@ if __name__ == "__main__":
         get_energy(results)
 
         print(results)
+        # with open('results-production.json', 'w') as f:
+        #     json.dump(results, f, indent=4)
+        
+        # Send results to API
+        url = 'http://172.17.63.153:1162/epn/sma-produce'
+        headers = {'Content-Type': 'application/json'}
+        data = json.dumps(results)
+        response = requests.post(url, headers=headers, json=results)
+        print(response.text)
 
     except Exception as e:
         logging.error(f"Error: {str(e)}")
