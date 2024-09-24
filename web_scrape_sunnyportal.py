@@ -53,11 +53,21 @@ def login():
         )
         logging.info("Login Success")
         login.click()
-        # time.sleep(5)
+        
+        # Cari elemen dengan find_elements yang mengembalikan list (empty list jika elemen tidak ditemukan)
+        time.sleep(8)
+        confirm_buttons = driver.find_elements(By.XPATH, "//ennexos-button[contains(@data-testid, 'dialog-action-close')]/button")
+
+        # Cek apakah elemen ditemukan
+        if confirm_buttons:
+            confirm_buttons[0].click()
+            logging.info("Confirmation clicked.")
+        else:
+            logging.info("Confirmation tidak ditemukan. Skipping click.")
 
     except Exception as e:
         logging.error(f"Gagal membuka Login Page! : {e}")
-        driver.quit()
+        raise e(f"Gagal membuka Login Page! : {e}")
 
 # Function untuk mengambil nama sistem
 def get_system(json):
@@ -75,7 +85,7 @@ def get_system(json):
     
     except Exception as e: 
         logging.error(f"Gagal mengambil System Name! : {e}")
-        driver.quit()
+        raise e(f"Gagal mengambil System Name! : {e}")
 
 # Function untuk mengambil weather status
 def get_weather_status(json):
@@ -93,8 +103,8 @@ def get_weather_status(json):
         return json
     except Exception as e:
         logging.error(f"Gagal mengambil Weather Status! : {e}")
-        driver.quit()
-
+        raise e(f"Gagal mengambil Weather Status! : {e}")
+    
 # Function untuk mengambil weather temperature
 def get_weather_temperature(json):
     try:
@@ -111,7 +121,7 @@ def get_weather_temperature(json):
         return json
     except Exception as e:
         logging.error(f"Gagal mengambil Data Weather! : {e}")
-        driver.quit()
+        raise e(f"Gagal membuka Data Weather! : {e}")
 
 # Function untuk mengambil revenue
 def get_revenue(json):
@@ -129,7 +139,7 @@ def get_revenue(json):
         return json
     except Exception as e:
         logging.error(f"Gagal mengambil Revenue! : {e}")
-        driver.quit()
+        raise e(f"Gagal mengambil Revenue! : {e}")
 
 # Function untuk mengambil co2
 def get_co2(json):
@@ -147,7 +157,7 @@ def get_co2(json):
         return json
     except Exception as e:
         logging.error(f"Gagal mengambil CO2 Avoidance! : {e}")
-        driver.quit()
+        raise e(f"Gagal mengambil CO2 Avoidance! : {e}")
 
 # Function untuk mengambil energy
 def get_energy(json):
@@ -172,7 +182,7 @@ def get_energy(json):
         return json
     except Exception as e:
         logging.error(f"Gagal mengambil Energy! : {e}")
-        driver.quit()
+        raise e(f"Gagal mengambil Energy! : {e}")
 
 # Function untuk mengambil status
 def get_status(json):
@@ -225,57 +235,57 @@ def get_status(json):
 
     except Exception as e:
         logging.error(f"Gagal mengambil Status! : {e}")
-        driver.quit()
+        raise e(f"Gagal mengambil Status! : {e}")
 
 if __name__ == "__main__":
     try:
         # Load Chromedriver
         web = 'https://ennexos.sunnyportal.com'
-        path= './chromedriver/chromedriver' #Chromedriver path
+        path= './chromedriver/chromedriver' #For MacOS
+        # path = "./chromedriver-win64/chromedriver.exe" #For Windows
         service = Service(executable_path=path)
 
         # ChromedriverOptions
         options = Options()
-        # options.add_argument("--headless=new") # For Headless Browser Windows
+        options.add_argument("--headless=new") # For Headless Browser Windows
         options.add_argument("--disable-gpu")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--no-sandbox")
 
         # Load URL
         driver = webdriver.Chrome(service=service, options=options)
-        # driver.get(web)
-
-        # results = {}
+        driver.get(web)
+        results = {}
     
         # Call Function
-        # login()
-        # get_system(results)
-        # get_weather_status(results)
-        # get_weather_temperature(results)
-        # get_revenue(results)
-        # get_co2(results)
-        # get_energy(results)
-        # get_status(results)
+        login()
+        get_system(results)
+        get_weather_status(results)
+        get_weather_temperature(results)
+        get_revenue(results)
+        get_co2(results)
+        get_energy(results)
+        get_status(results)
 
-        # Data Manipulate
-        results = {
-            "plant_name": "AUTO2000-KELAPA-GADING",
-            "today_revenue": 0.0,
-            "co2_avoidance": 0.0,
-            "energy": 124.32,
-        }
+        # Test Dummy Data
+        # results = {
+        #     "plant_name": "AUTO2000-KELAPA-GADING",
+        #     "today_revenue": 0.0,
+        #     "co2_avoidance": 0.0,
+        #     "energy": 100.64,
+        # }
 
-        # print(results)
+        print(results)
         # with open('results.json', 'w') as f:
         #     json.dump(results, f, indent=4)
 
-         # Send results to API
-        url = 'http://172.17.63.153:1162/epn/sma'
-        headers = {'Content-Type': 'application/json'}
-        data = json.dumps(results)
-        response = requests.post(url, headers=headers, json=results)
-        print(response.text)
-        print(results)
+        # Send results to API
+        # url = 'http://172.17.63.153:1162/epn/sma'
+        # headers = {'Content-Type': 'application/json'}
+        # data = json.dumps(results)
+        # response = requests.post(url, headers=headers, json=results)
+        # print(response.text)
+        # print(results)
 
     except Exception as e:
         logging.error(f"Error: {str(e)}")

@@ -29,8 +29,8 @@ def login():
 
         # Load ENV Variable
         load_dotenv(dotenv_path='.env')
-        value_email = os.getenv('USERNAME')
-        value_password = os.getenv('PASSWORD')
+        value_email = os.getenv('USERNAME_EPN')
+        value_password = os.getenv('PASSWORD_EPN')
         
         # Validate ENV Variable
         if (value_email is None or value_password is None):
@@ -61,6 +61,7 @@ def login():
 
     except Exception as e:
         logging.error(f"Gagal membuka Login Page! : {e}")
+        raise e(f"Gagal membuka Login Page! : {e}")
 
 # Function untuk mengambil Energy
 def get_energy(json):
@@ -76,6 +77,7 @@ def get_energy(json):
         return json
     except Exception as e:
         logging.error(f"Gagal mengambil Energy! : {e}")
+        raise e(f"Gagal mengambil Energy! : {e}")
 
 # Function untuk mengambil Revenue
 def get_revenue(json):
@@ -91,6 +93,7 @@ def get_revenue(json):
         return json
     except Exception as e:
         logging.error(f"Gagal mengambil Revenue! : {e}")
+        raise e(f"Gagal mengambil Revenue! : {e}")
 
 # Function untuk menghitung CO2 Avoidance
 def count_co2(json):
@@ -108,6 +111,7 @@ def count_co2(json):
         return json
     except Exception as e:
         logging.error(f"Gagal menghitung CO2 Avoidance! : {e}")
+        raise e(f"Gagal menghitung CO2 Avoidance : {e}")
 
 # Function untuk mengambil Weather
 def get_weather(json):
@@ -131,6 +135,7 @@ def get_weather(json):
         return json
     except Exception as e:
         logging.error(f"Gagal mengambil Weather! : {e}")
+        raise e(f"Gagal mengambil Weather! : {e}")
 
 # Function untuk membuka Homepage
 def homepage():
@@ -149,10 +154,11 @@ def homepage():
             EC.presence_of_element_located((By.XPATH, "//span[contains(@id, 'homeListView')]"))
         ).click()
 
-        logging.info("Homepage Button berhasil dibuka")
+        logging.info("Homepage berhasil dibuka")
         time.sleep(5)
     except Exception as e:
-        logging.error(f"Gagal membuka Homepage Button! : {e}")
+        logging.error(f"Gagal membuka Homepage! : {e}")
+        raise e(f"Gagal membuka Homepage! : {e}")
 
 # Function untuk mengambil status sistem
 def get_system(json):
@@ -179,18 +185,19 @@ def get_system(json):
         return json
     except Exception as e:
         logging.error(f"Gagal mengambil System Status! : {e}")
-        driver.quit()
+        raise e(f"Gagal mengambil System Status! : {e}")
 
 if __name__ == "__main__":
     try:
         # Load Chromedriver
         web = 'https://intl.fusionsolar.huawei.com/uniportal/'
-        path= './chromedriver/chromedriver' #Chromedriver path
+        path= './chromedriver/chromedriver' #For MacOS
+        # path = "./chromedriver-win64/chromedriver.exe" #For Windows
         service = Service(executable_path=path)
 
         # ChromedriverOptions
         options = Options()
-        # options.add_argument("--headless=new") # Headless Browser Windows
+        options.add_argument("--headless=new") # Headless Browser Windows
         options.add_argument("--disable-gpu")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--no-sandbox")
@@ -210,10 +217,10 @@ if __name__ == "__main__":
         # homepage()
         # get_system(results)
 
-        # Data Manipulate
+        # Test Dummy Data
         results = {
-            "today_energy": 34.56,
-            "today_revenue": 17.30,
+            "today_energy": 30.52,
+            "today_revenue": 15.28,
             "today_co2_avoidance": 0,
             "plant_name": "PAMA SKYBRIDGE 2",
             "plant_status": "Normal"

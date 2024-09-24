@@ -111,7 +111,8 @@ if __name__ == "__main__":
     try:
         # Load Chromedriver
         web = 'https://ennexos.sunnyportal.com'
-        path= './chromedriver/chromedriver' #Chromedriver path
+        path= './chromedriver/chromedriver' #For MacOS
+        # path = "./chromedriver-win64/chromedriver.exe" #For Windows
         service = Service(executable_path=path)
 
         # ChromedriverOptions

@@ -54,11 +54,21 @@ def login():
         )
         logging.info("Login Success")
         login.click()
-        # time.sleep(5)
+
+        # Cari elemen dengan find_elements yang mengembalikan list (empty list jika elemen tidak ditemukan)
+        time.sleep(8)
+        confirm_buttons = driver.find_elements(By.XPATH, "//ennexos-button[contains(@data-testid, 'dialog-action-close')]/button")
+
+        # Cek apakah elemen ditemukan
+        if confirm_buttons:
+            confirm_buttons[0].click()
+            logging.info("Confirmation clicked.")
+        else:
+            logging.info("Confirmation tidak ditemukan. Skipping click.")
 
     except Exception as e:
         logging.error(f"Gagal membuka Login Page! : {e}")
-        driver.quit()
+        raise e(f"Gagal membuka Login Page! : {e}")
 
 # Function untuk mengambil nama device
 def get_device(json):
@@ -76,7 +86,7 @@ def get_device(json):
 
     except Exception as e:
         logging.error(f"Gagal mengambil Status! : {e}")
-        driver.quit()
+        raise e(f"Gagal mengambil Status! : {e}")
 
 # Function untuk membuka page Energy & Power
 def power_page():
@@ -100,6 +110,7 @@ def power_page():
         time.sleep(5)
     except Exception as e:
         logging.error(f"Gagal membuka page Energy & Power! : {e}")
+        raise e(f"Gagal membuka Page Energy & Power! : {e}")
 
 # Function untuk mengambil data energy
 def get_energy(json):
@@ -116,46 +127,64 @@ def get_energy(json):
             EC.presence_of_all_elements_located((By.XPATH, "//mat-cell[contains(@class, 'mat-mdc-cell mdc-data-table__cell cdk-cell cdk-column-Power-drawn7223763 mat-column-Power-drawn7223763 ng-star-inserted')]"))
         )
 
-        # Get Latest Index
-        latest_index = len(array_power) - 1
-
-        # Clean the string to remove commas before converting to float
-        energy_value = array_power[latest_index].text.replace(',', '.')
-        json["energy_consumption"] = float(energy_value)
-
-        # Get Time Period
-        array_time = WebDriverWait(driver,30).until(
+        # Get Time Period Data
+        array_time = WebDriverWait(driver, 30).until(
             EC.presence_of_all_elements_located((By.XPATH, "//mat-cell[contains(@class, 'mat-mdc-cell mdc-data-table__cell cdk-cell cdk-column-dateColumnKey mat-column-dateColumnKey ng-star-inserted')]"))
         )
 
-        # Get the current date
-        current_date = datetime.now()
+        # Validation if array length below 3
+        if len(array_power) < 3:
+            logging.error("Data Energy belum bisa diambil!")
+            return []
 
-        # Convert the time string to a datetime object
-        time_obj = datetime.strptime(array_time[latest_index].text, "%I.%M %p")
+        # Get Latest Index
+        latest_index = len(array_power) - 1
+        
+        # Prepare list for storing last 3 indices data
+        last_3_entries = []  # List to store the last 3 entries
 
-        # Combine the current date and time into a single datetime object
-        datetime_obj = current_date.replace(hour=time_obj.hour, minute=time_obj.minute, second=0, microsecond=0)
+        # Loop through the last 3 indices
+        for i in range(3):
+            index = latest_index - i
+            if index < 0:
+                break  # Prevent accessing negative index
 
-        json["time_period"] = datetime_obj.strftime("%Y-%m-%d %H:%M:%S")
-    
+            # Clean the string to remove commas before converting to float
+            energy_value = array_power[index].text.replace(',', '.')
+
+            # Get Time Period and convert to the desired format
+            current_date = datetime.now()
+            time_obj = datetime.strptime(array_time[index].text, "%I.%M %p")
+            datetime_obj = current_date.replace(hour=time_obj.hour, minute=time_obj.minute, second=0, microsecond=0)
+
+            # Append to last_3_entries list
+            last_3_entries.append({
+                "device_name": json["device_name"],
+                "energy_consumption": float(energy_value),
+                "time_period": datetime_obj.strftime("%Y-%m-%d %H:%M:%S")
+            })
+
+        # Update the passed-in 'result' dict with the last 3 entries
+        json["energy_data"] = last_3_entries
+
         logging.info("Energy berhasil di-ambil!")
 
         return json
     except Exception as e:
         logging.error(f"Gagal mengambil Energy! : {e}")
-        driver.quit()
+        raise e(f"Gagal mengambil Energy! : {e}")
 
 if __name__ == "__main__":
     try:
         # Load Chromedriver
         web = 'https://ennexos.sunnyportal.com'
-        path= './chromedriver/chromedriver' #Chromedriver path
+        path= './chromedriver/chromedriver' #For MacOS
+        # path = "./chromedriver-win64/chromedriver.exe" #For Windows
         service = Service(executable_path=path)
 
         # ChromedriverOptions
         options = Options()
-        # options.add_argument("--headless=new") # For Headless Browser Windows
+        options.add_argument("--headless=new") # For Headless Browser Windows
         options.add_argument("--disable-gpu")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--no-sandbox")
@@ -174,11 +203,11 @@ if __name__ == "__main__":
 
         print(results)
         # Send results to API
-        url = 'http://172.17.63.153:1162/epn/sma-consume'
-        headers = {'Content-Type': 'application/json'}
-        data = json.dumps(results)
-        response = requests.post(url, headers=headers, json=results)
-        print(response.text)
+        # url = 'http://172.17.63.153:1162/epn/sma-consume'
+        # headers = {'Content-Type': 'application/json'}
+        # data = json.dumps(results)
+        # response = requests.post(url, headers=headers, json=results)
+        # print(response.text)
 
     except Exception as e:
         logging.error(f"Error: {str(e)}")
