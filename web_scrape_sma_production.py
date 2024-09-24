@@ -193,8 +193,8 @@ if __name__ == "__main__":
     try:
         # Load Chromedriver
         web = 'https://ennexos.sunnyportal.com'
-        path= './chromedriver/chromedriver' #For MacOS
-        # path = "./chromedriver-win64/chromedriver.exe" #For Windows
+        # path= './chromedriver/chromedriver' #For MacOS
+        path = "./chromedriver-win64/chromedriver.exe" #For Windows
         service = Service(executable_path=path)
 
         # ChromedriverOptions
@@ -215,16 +215,13 @@ if __name__ == "__main__":
         get_status(results)
         monitoring()
         get_energy(results)
-
-        # with open('results-production.json', 'w') as f:
-        #     json.dump(results, f, indent=4)
         
         # Send results to API
-        # url = 'http://172.17.63.153:1162/epn/test'
-        # headers = {'Content-Type': 'application/json'}
-        # data = json.dumps(results)
-        # response = requests.post(url, headers=headers, json=results)
-        # print(response.text)
+        url = 'http://172.17.63.153:1162/epn/sma-produce'
+        headers = {'Content-Type': 'application/json'}
+        data = json.dumps(results)
+        response = requests.post(url, headers=headers, json=results)
+        print(response.text)
 
     except Exception as e:
         logging.error(f"Error: {str(e)}")

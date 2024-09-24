@@ -178,8 +178,8 @@ if __name__ == "__main__":
     try:
         # Load Chromedriver
         web = 'https://ennexos.sunnyportal.com'
-        path= './chromedriver/chromedriver' #For MacOS
-        # path = "./chromedriver-win64/chromedriver.exe" #For Windows
+        # path = './chromedriver/chromedriver' #For MacOS
+        path = "./chromedriver-win64/chromedriver.exe" #For Windows
         service = Service(executable_path=path)
 
         # ChromedriverOptions
@@ -192,7 +192,6 @@ if __name__ == "__main__":
         # Load URL
         driver = webdriver.Chrome(service=service, options=options)
         driver.get(web)
-
         results = {}
     
         # Call Function
@@ -203,11 +202,11 @@ if __name__ == "__main__":
 
         print(results)
         # Send results to API
-        # url = 'http://172.17.63.153:1162/epn/sma-consume'
-        # headers = {'Content-Type': 'application/json'}
-        # data = json.dumps(results)
-        # response = requests.post(url, headers=headers, json=results)
-        # print(response.text)
+        url = 'http://172.17.63.153:1162/epn/sma-consume'
+        headers = {'Content-Type': 'application/json'}
+        data = json.dumps(results)
+        response = requests.post(url, headers=headers, json=results)
+        print(response.text)
 
     except Exception as e:
         logging.error(f"Error: {str(e)}")
